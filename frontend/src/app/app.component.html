@@ -1,0 +1,33 @@
+<div class="shell">
+  <header class="header">
+    <div><div class="eyebrow">PORTFOLIO DEMONSTRATION · ASSET MANAGEMENT</div><h1>AssetFlow <span>Console</span></h1><p>Inventory operations, powered by Kotlin, Spring Boot and MongoDB.</p></div>
+    <span class="status-dot">Local demo</span>
+  </header>
+  <section class="stats" aria-label="Asset overview">
+    <article class="stat"><small>Registered assets</small><strong>{{summary?.total ?? totalElements}}</strong></article>
+    <article class="stat"><small>Available</small><strong>{{summary?.byStatus?.AVAILABLE ?? '—'}}</strong></article>
+    <article class="stat"><small>Assigned</small><strong>{{summary?.byStatus?.ASSIGNED ?? '—'}}</strong></article>
+    <article class="stat"><small>Maintenance</small><strong>{{summary?.byStatus?.MAINTENANCE ?? '—'}}</strong></article>
+  </section>
+  <div class="columns">
+    <section class="panel editor">
+      <div class="section-head"><h2>{{editingId ? 'Edit asset' : 'Register an asset'}}</h2><span class="muted">Validated REST form</span></div>
+      <p class="alert error" *ngIf="error" role="alert">{{error}}</p>
+      <p class="alert ok" *ngIf="notice" role="status">{{notice}}</p>
+      <form (ngSubmit)="save()" #assetForm="ngForm">
+        <label>Asset name<input name="name" [(ngModel)]="draft.name" required maxlength="120" placeholder="ThinkPad T14"/></label>
+        <label>Serial number<input name="serial" [(ngModel)]="draft.serialNumber" required maxlength="64" placeholder="LAP-0083"/></label>
+        <div class="pair"><label>Category<input name="category" [(ngModel)]="draft.category" required/></label><label>Team<input name="team" [(ngModel)]="draft.ownerTeam" required/></label></div>
+        <div class="pair"><label>Status<select name="status" [(ngModel)]="draft.status"><option *ngFor="let status of statuses" [value]="status">{{status}}</option></select></label><label>Value (€)<input type="number" name="value" [(ngModel)]="draft.purchaseValue" min="0" step="0.01"/></label></div>
+        <div class="form-actions"><button class="primary" type="submit" [disabled]="assetForm.invalid || busy">{{editingId ? 'Save changes' : 'Create asset'}}</button><button type="button" class="ghost" *ngIf="editingId" (click)="reset()">Cancel</button></div>
+      </form>
+    </section>
+    <section class="panel table-panel">
+      <div class="section-head"><h2>Asset inventory</h2><span class="muted">{{totalElements}} total</span></div>
+      <div class="toolbar"><input aria-label="Search by name" placeholder="Search asset name..." [(ngModel)]="search" (keyup.enter)="applyFilters()"/><select aria-label="Filter by status" [(ngModel)]="statusFilter" (change)="applyFilters()"><option value="">All statuses</option><option *ngFor="let status of statuses" [value]="status">{{status}}</option></select><button (click)="applyFilters()">Search</button></div>
+      <div class="overflow"><table><thead><tr><th>Asset</th><th>Team</th><th>Status</th><th>Value</th><th>Actions</th></tr></thead><tbody><tr *ngFor="let a of assets"><td><strong>{{a.name}}</strong><small>{{a.serialNumber}} · {{a.category}}</small></td><td>{{a.ownerTeam}}</td><td><span class="pill" [attr.data-status]="a.status">{{a.status}}</span></td><td>{{a.purchaseValue | currency:'EUR'}}</td><td><div class="actions"><button (click)="edit(a)">Edit</button><button class="danger" (click)="remove(a)">Delete</button></div></td></tr><tr *ngIf="assets.length === 0"><td colspan="5" class="empty">{{busy ? 'Loading...' : 'No assets found. Create your first asset.'}}</td></tr></tbody></table></div>
+      <div class="pagination"><button (click)="go(page - 1)" [disabled]="page === 0">← Previous</button><span>Page {{totalPages ? page+1 : 0}} / {{totalPages}}</span><button (click)="go(page + 1)" [disabled]="page+1 >= totalPages">Next →</button></div>
+    </section>
+  </div>
+  <footer>Independent portfolio implementation · No real customer data · © 2026</footer>
+</div>
